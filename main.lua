@@ -13,8 +13,19 @@ local entities = {
             ay = 0
         },
         ship = {
+            fuel = 3,
+            fuelMax = 3,
             booster = false
         }
+    },
+    fuelGauge = {
+        transform = {
+            x = 0.02,
+            y = 0.94,
+            w = 0.2,
+            h = 0.04
+        },
+        fuelGauge = {}
     },
     wall = {
         id = "wall",
@@ -36,6 +47,12 @@ local systems = {
                     e.ship.booster = love.keyboard.isDown("space")
                     local gravity = -0.2
                     local boost = e.ship.booster and 0.4 or 0
+                    e.ship.fuel = e.ship.fuel - boost * dt
+                    if e.ship.fuel < 0 then
+                        e.ship.fuel = 0
+                        e.ship.booster = false
+                        boost = 0
+                    end
                     e.body.ax = 0
                     e.body.ay = gravity + boost
                 end
@@ -69,6 +86,30 @@ local systems = {
                         )
                     end
                     love.graphics.pop()
+                end
+            end
+        end
+    },
+    fuelGauge = {
+        draw = function()
+            for id, e in pairs(entities) do
+                if e.fuelGauge then
+                    love.graphics.rectangle(
+                        "line",
+                        e.transform.x,
+                        e.transform.y,
+                        e.transform.w,
+                        e.transform.h
+                    )
+                    local padding = e.transform.h / 6
+                    local ratio = entities.ship.ship.fuel / entities.ship.ship.fuelMax
+                    love.graphics.rectangle(
+                        "fill",
+                        e.transform.x + padding,
+                        e.transform.y + padding,
+                        (e.transform.w - 2 * padding) * ratio,
+                        e.transform.h - 2 * padding
+                    )
                 end
             end
         end
