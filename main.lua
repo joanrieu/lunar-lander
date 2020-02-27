@@ -1,22 +1,26 @@
 local entities = {
     ship = {
-        ship = {
+        transform = {
             x = 0.5,
-            y = 0.9,
+            y = 0.9
+        },
+        body = {
             vx = 0,
             vy = 0,
             ax = 0,
             ay = 0
-        }
+        },
+        ship = {}
     },
     wall = {
         id = "wall",
-        wall = {
-            x0 = 0,
-            y0 = 0,
-            x1 = 1,
-            y1 = 0.5
-        }
+        transform = {
+            x = 0,
+            y = 0,
+            w = 1,
+            h = 0.5
+        },
+        wall = {}
     }
 }
 
@@ -27,12 +31,8 @@ local systems = {
                 if e.ship then
                     local booster
                     if love.keyboard.isDown("space") then booster = 1 else booster = 0 end
-                    e.ship.ax = 0
-                    e.ship.ay = (-0.002 + booster * 0.004) * dt
-                    e.ship.vx = e.ship.vx + e.ship.ax
-                    e.ship.vy = e.ship.vy + e.ship.ay
-                    e.ship.x = e.ship.x + e.ship.vx
-                    e.ship.y = e.ship.y + e.ship.vy
+                    e.body.ax = 0
+                    e.body.ay = -0.2 + booster * 0.4
                 end
             end
         end,
@@ -40,9 +40,21 @@ local systems = {
             for id, e in pairs(entities) do
                 if e.ship then
                     love.graphics.push()
-                    love.graphics.translate(size * e.ship.x, -size * (e.ship.y - 1))
-                    love.graphics.line(0, 0, 10, 10, 0, 10, 0, 0)
+                    love.graphics.translate(e.transform.x, e.transform.y)
+                    love.graphics.line(0, 0, 0.05, 0.05, 0, 0.05, 0, 0)
                     love.graphics.pop()
+                end
+            end
+        end
+    },
+    body = {
+        update = function(dt)
+            for id, e in pairs(entities) do
+                if e.body then
+                    e.body.vx = e.body.vx + e.body.ax * dt
+                    e.body.vy = e.body.vy + e.body.ay * dt
+                    e.transform.x = e.transform.x + e.body.vx * dt
+                    e.transform.y = e.transform.y + e.body.vy * dt
                 end
             end
         end
@@ -51,30 +63,30 @@ local systems = {
         update = function(dt)
             for id, e in pairs(entities) do
                 if e.wall then
-                    local dx = e.wall.x1 - e.wall.x0
-                    if dx > 0.03 then
+                    if e.transform.w > 1 / size then
                         entities[e.id] = nil
-                        local dy = e.wall.y1 - e.wall.y0
-                        local xm = (e.wall.x0 + e.wall.x1) / 2
-                        local ym = (e.wall.y0 + e.wall.y1) / 2 + (math.random() - 0.5) * 0.5 * dy
+                        local hw = e.transform.w / 2
+                        local hh = e.transform.h / 2 * (1 + (math.random() - 0.5) / 2)
                         local left = {
                             id = e.id .. 0,
-                            wall = {
-                                x0 = e.wall.x0,
-                                y0 = e.wall.y0,
-                                x1 = xm,
-                                y1 = ym
-                            }
+                            transform = {
+                                x = e.transform.x,
+                                y = e.transform.y,
+                                w = hw,
+                                h = hh
+                            },
+                            wall = {}
                         }
                         entities[left.id] = left
                         local right = {
                             id = e.id .. 1,
-                            wall = {
-                                x0 = xm,
-                                y0 = ym,
-                                x1 = e.wall.x1,
-                                y1 = e.wall.y1
-                            }
+                            transform = {
+                                x = e.transform.x + hw,
+                                y = e.transform.y + hh,
+                                w = e.transform.w - hw,
+                                h = e.transform.h - hh
+                            },
+                            wall = {}
                         }
                         entities[right.id] = right
                     end
@@ -85,7 +97,12 @@ local systems = {
             for id, e in pairs(entities) do
                 if e.wall then
                     love.graphics.push()
-                    love.graphics.line(size * e.wall.x0, -size * (e.wall.y0 - 1), size * e.wall.x1, -size * (e.wall.y1 - 1))
+                    love.graphics.line(
+                        e.transform.x,
+                        e.transform.y,
+                        e.transform.x + e.transform.w,
+                        e.transform.y + e.transform.h
+                    )
                     love.graphics.pop()
                 end
             end
@@ -114,6 +131,9 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.scale(size, -size)
+    love.graphics.translate(0, -1)
+    love.graphics.setLineWidth(1 / size)
     for k, v in pairs(systems) do
         if v.draw then
             v.draw()
