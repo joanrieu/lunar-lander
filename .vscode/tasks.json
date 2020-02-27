@@ -7,7 +7,7 @@
             "label": "love",
             "type": "shell",
             "group": {
-                "kind": "test",
+                "kind": "build",
                 "isDefault": true
             },
             "command": "love ${cwd}",
