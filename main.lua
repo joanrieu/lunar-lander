@@ -2,7 +2,9 @@ local entities = {
     ship = {
         transform = {
             x = 0.5,
-            y = 0.9
+            y = 0.9,
+            w = .05,
+            h = .07
         },
         body = {
             vx = 0,
@@ -10,7 +12,9 @@ local entities = {
             ax = 0,
             ay = 0
         },
-        ship = {}
+        ship = {
+            booster = false
+        }
     },
     wall = {
         id = "wall",
@@ -29,10 +33,11 @@ local systems = {
         update = function(dt)
             for id, e in pairs(entities) do
                 if e.ship then
-                    local booster
-                    if love.keyboard.isDown("space") then booster = 1 else booster = 0 end
+                    e.ship.booster = love.keyboard.isDown("space")
+                    local gravity = -0.2
+                    local boost = e.ship.booster and 0.4 or 0
                     e.body.ax = 0
-                    e.body.ay = -0.2 + booster * 0.4
+                    e.body.ay = gravity + boost
                 end
             end
         end,
@@ -41,7 +46,28 @@ local systems = {
                 if e.ship then
                     love.graphics.push()
                     love.graphics.translate(e.transform.x, e.transform.y)
-                    love.graphics.line(0, 0, 0.05, 0.05, 0, 0.05, 0, 0)
+                    local hw = e.transform.w / 2
+                    local hh = e.transform.h / 2
+                    love.graphics.line(
+                        -hw, -hh,
+                        -hw, 0,
+                        -hw / 2, hh,
+                        hw / 2, hh,
+                        hw, 0,
+                        hw, -hh,
+                        -hw, -hh
+                    )
+                    if e.ship.booster then
+                        love.graphics.line(
+                            -hw / 2, -hh,
+                            -hw / 3, -hh * 1.5,
+                            -hw / 4, -hh,
+                            0, -hh * 2,
+                            hw / 4, -hh,
+                            hw / 3, -hh * 1.5,
+                            hw / 2, -hh
+                        )
+                    end
                     love.graphics.pop()
                 end
             end
@@ -66,7 +92,7 @@ local systems = {
                     if e.transform.w > 1 / size then
                         entities[e.id] = nil
                         local hw = e.transform.w / 2
-                        local hh = e.transform.h / 2 * (1 + (math.random() - 0.5) / 2)
+                        local hh = e.transform.h / 2 * (1 + (math.random() - 0.5))
                         local left = {
                             id = e.id .. 0,
                             transform = {
