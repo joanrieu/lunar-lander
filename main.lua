@@ -18,6 +18,30 @@ local entities = {
             booster = false
         }
     },
+    booster1 = {
+        booster = {
+            throttle = 0,
+            ax = 0,
+            ay = 0.4,
+            key = "up"
+        }
+    },
+    booster2 = {
+        booster = {
+            throttle = 0,
+            ax = 0.1,
+            ay = 0,
+            key = "right"
+        }
+    },
+    booster3 = {
+        booster = {
+            throttle = 0,
+            ax = -0.1,
+            ay = 0,
+            key = "left"
+        }
+    },
     fuelGauge = {
         transform = {
             x = 0.02,
@@ -44,17 +68,14 @@ local systems = {
         update = function(dt)
             for id, e in pairs(entities) do
                 if e.ship then
-                    e.ship.booster = love.keyboard.isDown("space")
                     local gravity = -0.2
-                    local boost = e.ship.booster and 0.4 or 0
-                    e.ship.fuel = e.ship.fuel - boost * dt
-                    if e.ship.fuel < 0 then
-                        e.ship.fuel = 0
-                        e.ship.booster = false
-                        boost = 0
-                    end
                     e.body.ax = 0
-                    e.body.ay = gravity + boost
+                    e.body.ay = gravity
+                    for i = 1, 3 do
+                        local booster = entities["booster" .. i].booster
+                        e.body.ax = e.body.ax + booster.throttle * booster.ax
+                        e.body.ay = e.body.ay + booster.throttle * booster.ay
+                    end
                 end
             end
         end,
@@ -74,7 +95,7 @@ local systems = {
                         hw, -hh,
                         -hw, -hh
                     )
-                    if e.ship.booster then
+                    if entities.booster1.booster.throttle > 0 then
                         love.graphics.line(
                             -hw / 2, -hh,
                             -hw / 3, -hh * 1.5,
@@ -86,6 +107,25 @@ local systems = {
                         )
                     end
                     love.graphics.pop()
+                end
+            end
+        end
+    },
+    booster = {
+        update = function(dt)
+            for id, e in pairs(entities) do
+                if e.booster then
+                    if love.keyboard.isDown(e.booster.key) then
+                        e.booster.throttle = 1
+                        local consumption = math.abs(e.booster.ax) + math.abs(e.booster.ay)
+                        entities.ship.ship.fuel = entities.ship.ship.fuel - consumption * dt
+                        if entities.ship.ship.fuel < 0 then
+                            entities.ship.ship.fuel = 0
+                            e.booster.throttle = 0
+                        end
+                    else
+                        e.booster.throttle = 0
+                    end
                 end
             end
         end
