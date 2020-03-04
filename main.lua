@@ -99,6 +99,23 @@ local systems = {
                         e.body.ax = e.body.ax + booster.throttle * booster.ax
                         e.body.ay = e.body.ay + booster.throttle * booster.ay
                     end
+                    if e.collision then
+                        entities.ship = nil
+                        entities.booster1 = nil
+                        entities.booster2 = nil
+                        entities.booster3 = nil
+                        entities.fuelGauge = nil
+                        local t = e.collision.target.transform
+                        entities.explosion = {
+                            transform = {
+                                x = t.x,
+                                y = t.y
+                            },
+                            explosion = {
+                                time = 0
+                            }
+                        }
+                    end
                 end
             end
         end,
@@ -207,6 +224,31 @@ local systems = {
             end
         end
     },
+    shipWallCollider = {
+        update = function(dt)
+            for id, e in pairs(entities) do
+                if e.ship then
+                    local t = e.transform
+                    local distanceMax = 1 / 0
+                    local targetMax = nil
+                    for id2, e2 in pairs(entities) do
+                        if e2.wall then
+                            local t2 = e2.transform
+                            local distance = math.sqrt((t.x - t2.x) ^ 2 + (t.y - t2.y) ^ 2)
+                            if distance < distanceMax then
+                                distanceMax = distance
+                                targetMax = e2
+                            end
+                        end
+                    end
+                    e.collision = distanceMax < math.sqrt(t.w ^ 2 + t.h ^ 2) / 2 and {
+                        target = targetMax,
+                        distance = distanceMax
+                    } or nil
+                end
+            end
+        end
+    },
     wall = {
         update = function(dt)
             for id, e in pairs(entities) do
@@ -252,6 +294,29 @@ local systems = {
                         e.transform.y + e.transform.h
                     )
                     love.graphics.pop()
+                end
+            end
+        end
+    },
+    explosion = {
+        update = function(dt)
+            for id, e in pairs(entities) do
+                if e.explosion then
+                    e.explosion.time = e.explosion.time + dt
+                    if (e.explosion.time > 1) then
+                        entities[id] = nil
+                    end
+                end
+            end
+        end,
+        draw = function()
+            for id, e in pairs(entities) do
+                if e.explosion then
+                    local lw = love.graphics.getLineWidth()
+                    local t = e.transform
+                    love.graphics.setLineWidth(0.5)
+                    love.graphics.circle("line", t.x, t.y, 3 * e.explosion.time)
+                    love.graphics.setLineWidth(lw)
                 end
             end
         end
