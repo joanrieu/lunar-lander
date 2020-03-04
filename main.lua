@@ -3,8 +3,8 @@ local entities = {
         transform = {
             x = 0.5,
             y = 0.9,
-            w = .05,
-            h = .07
+            w = 0.05,
+            h = 0.07
         },
         body = {
             vx = 0,
@@ -14,32 +14,55 @@ local entities = {
         },
         ship = {
             fuel = 3,
-            fuelMax = 3,
-            booster = false
+            fuelMax = 3
         }
     },
     booster1 = {
+        transform = {
+            x = 0,
+            y = -0.035,
+            w = 0.025,
+            h = 0.035,
+            angle = 0
+        },
         booster = {
             throttle = 0,
             ax = 0,
             ay = 0.4,
-            key = "up"
+            key = "up",
+            main = true
         }
     },
     booster2 = {
+        transform = {
+            x = -0.025,
+            y = 0,
+            w = 0.010,
+            h = 0.015,
+            angle = -math.pi / 2
+        },
         booster = {
             throttle = 0,
             ax = 0.1,
             ay = 0,
-            key = "right"
+            key = "right",
+            main = false
         }
     },
     booster3 = {
+        transform = {
+            x = 0.025,
+            y = 0,
+            w = 0.010,
+            h = 0.015,
+            angle = math.pi / 2
+        },
         booster = {
             throttle = 0,
             ax = -0.1,
             ay = 0,
-            key = "left"
+            key = "left",
+            main = false
         }
     },
     fuelGauge = {
@@ -95,17 +118,6 @@ local systems = {
                         hw, -hh,
                         -hw, -hh
                     )
-                    if entities.booster1.booster.throttle > 0 then
-                        love.graphics.line(
-                            -hw / 2, -hh,
-                            -hw / 3, -hh * 1.5,
-                            -hw / 4, -hh,
-                            0, -hh * 2,
-                            hw / 4, -hh,
-                            hw / 3, -hh * 1.5,
-                            hw / 2, -hh
-                        )
-                    end
                     love.graphics.pop()
                 end
             end
@@ -126,6 +138,35 @@ local systems = {
                     else
                         e.booster.throttle = 0
                     end
+                end
+            end
+        end,
+        draw = function()
+            for id, e in pairs(entities) do
+                if e.booster and e.booster.throttle > 0 then
+                    love.graphics.push()
+                    love.graphics.translate(entities.ship.transform.x, entities.ship.transform.y)
+                    local t = e.transform
+                    love.graphics.translate(t.x, t.y)
+                    love.graphics.rotate(t.angle)
+                    if e.booster.main then
+                        love.graphics.line(
+                            -t.w / 2, 0,
+                            -t.w / 3, -t.h / 2,
+                            -t.w / 4, 0,
+                            0, -t.h,
+                            t.w / 4, 0,
+                            t.w / 3, -t.h / 2,
+                            t.w / 2, 0
+                        )
+                    else
+                        love.graphics.line(
+                            -t.w / 2, 0,
+                            0, -t.h / 2,
+                            t.w / 2, 0
+                        )
+                    end
+                    love.graphics.pop()
                 end
             end
         end
