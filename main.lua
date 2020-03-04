@@ -215,7 +215,7 @@ local systems = {
     body = {
         update = function(dt)
             for id, e in pairs(entities) do
-                if e.body then
+                if e.body and not e.body.grounded then
                     e.body.vx = e.body.vx + e.body.ax * dt
                     e.body.vy = e.body.vy + e.body.ay * dt
                     e.transform.x = e.transform.x + e.body.vx * dt
@@ -241,27 +241,61 @@ local systems = {
                             end
                         end
                     end
-                    e.collision = distanceMax < math.sqrt(t.w ^ 2 + t.h ^ 2) / 2 and {
-                        target = targetMax,
-                        distance = distanceMax
-                    } or nil
+                    if distanceMax < math.sqrt(t.w ^ 2 + t.h ^ 2) / 2 then
+                        e.collision = {
+                            target = targetMax
+                        }
+                    end
+                end
+            end
+        end
+    },
+    shipPadCollider = {
+        update = function(dt)
+            if entities.ship and entities.pad then
+                local s = entities.ship.transform
+                local p = entities.pad.transform
+
+                -- landing conditions
+                local dx = math.abs(s.x - p.x)
+                local dy = math.abs((s.y - s.h / 2) - p.y)
+                local v = math.sqrt(entities.ship.body.vx ^ 2 + entities.ship.body.vy ^ 2)
+                local offsetOkay = dx < s.w / 2
+                local altitudeOkay = dy < 0.001
+                local speedOkay = v < 0.08
+                local isLanding = offsetOkay and altitudeOkay and speedOkay
+
+                -- rectangle collision check
+                local dx = math.abs(s.x - p.x)
+                local dy = math.abs(s.y - (p.y - p.h / 2))
+                local isColliding = dx < (s.w + p.w) / 2 and dy < (s.h + p.h) / 2
+
+                if isLanding then
+                    entities.ship.body.grounded = true
+                    entities.ship.transform.y = s.h / 2 + entities.pad.transform.y
+                elseif isColliding then
+                    entities.ship.collision = {
+                        target = entities.pad
+                    }
                 end
             end
         end
     },
     wall = {
         update = function(dt)
+            local padWalls = {}
             for id, e in pairs(entities) do
                 if e.wall then
-                    if e.transform.w > 1 / size then
+                    local t = e.transform
+                    if t.w > 1 / size then
                         entities[e.id] = nil
-                        local hw = e.transform.w / 2
-                        local hh = e.transform.h / 2 * (1 + (math.random() - 0.5))
+                        local hw = t.w / 2
+                        local hh = t.h / 2 * (1 + (math.random() - 0.5))
                         local left = {
                             id = e.id .. 0,
                             transform = {
-                                x = e.transform.x,
-                                y = e.transform.y,
+                                x = t.x,
+                                y = t.y,
                                 w = hw,
                                 h = hh
                             },
@@ -271,16 +305,31 @@ local systems = {
                         local right = {
                             id = e.id .. 1,
                             transform = {
-                                x = e.transform.x + hw,
-                                y = e.transform.y + hh,
-                                w = e.transform.w - hw,
-                                h = e.transform.h - hh
+                                x = t.x + hw,
+                                y = t.y + hh,
+                                w = t.w - hw,
+                                h = t.h - hh
                             },
                             wall = {}
                         }
                         entities[right.id] = right
+                        padWalls = nil
+                    elseif padWalls and t.x > 0.2 and t.x < 0.8 then
+                        padWalls[#padWalls + 1] = e
                     end
                 end
+            end
+            if not entities.pad and padWalls then
+                local t = padWalls[math.random(1, #padWalls)].transform
+                entities.pad = {
+                    transform = {
+                        x = t.x,
+                        y = t.y + 0.05,
+                        w = 0.05,
+                        h = 0.05
+                    },
+                    pad = {}
+                }
             end
         end,
         draw = function()
@@ -317,6 +366,17 @@ local systems = {
                     love.graphics.setLineWidth(0.5)
                     love.graphics.circle("line", t.x, t.y, 3 * e.explosion.time)
                     love.graphics.setLineWidth(lw)
+                end
+            end
+        end
+    },
+    pad = {
+        draw = function()
+            for id, e in pairs(entities) do
+                if e.pad then
+                    local t = e.transform
+                    love.graphics.line(t.x - t.w / 2, t.y, t.x + t.w / 2, t.y)
+                    love.graphics.line(t.x, t.y, t.x, t.y - t.h)
                 end
             end
         end
