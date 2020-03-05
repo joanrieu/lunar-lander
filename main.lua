@@ -36,9 +36,9 @@ local entities = {
     booster2 = {
         transform = {
             x = -0.025,
-            y = 0,
-            w = 0.010,
-            h = 0.015,
+            y = 0.003,
+            w = 0.015,
+            h = 0.020,
             angle = -math.pi / 2
         },
         booster = {
@@ -52,9 +52,9 @@ local entities = {
     booster3 = {
         transform = {
             x = 0.025,
-            y = 0,
-            w = 0.010,
-            h = 0.015,
+            y = 0.003,
+            w = 0.015,
+            h = 0.020,
             angle = math.pi / 2
         },
         booster = {
@@ -187,23 +187,37 @@ local systems = {
                     local t = e.transform
                     love.graphics.translate(t.x, t.y)
                     love.graphics.rotate(t.angle)
+                    local oldColorR, oldColorG, oldColorB, oldColorA = love.graphics.getColor()
+                    love.graphics.setColor(1, math.random(), 0)
+                    local rand = math.random() * 0.5 + 0.5
                     if e.booster.main then
-                        love.graphics.line(
+                        love.graphics.polygon(
+                            "fill",
                             -t.w / 2, 0,
-                            -t.w / 3, -t.h / 2,
+                            -t.w / 3, -t.h / 2 * rand,
+                            -t.w / 4, 0
+                        )
+                        love.graphics.polygon(
+                            "fill",
                             -t.w / 4, 0,
-                            0, -t.h,
+                            0, -t.h * rand,
+                            t.w / 4, 0
+                        )
+                        love.graphics.polygon(
+                            "fill",
                             t.w / 4, 0,
-                            t.w / 3, -t.h / 2,
+                            t.w / 3, -t.h / 2 * rand,
                             t.w / 2, 0
                         )
                     else
-                        love.graphics.line(
+                        love.graphics.polygon(
+                            "fill",
                             -t.w / 2, 0,
-                            0, -t.h / 2,
+                            0, -t.h / 2 * rand,
                             t.w / 2, 0
                         )
                     end
+                    love.graphics.setColor(oldColorR, oldColorG, oldColorB, oldColorA)
                     love.graphics.pop()
                 end
             end
