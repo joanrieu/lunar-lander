@@ -20,7 +20,7 @@ local entities = {
     booster1 = {
         transform = {
             x = 0,
-            y = -0.035,
+            y = -0.023,
             w = 0.025,
             h = 0.035,
             angle = 0
@@ -122,18 +122,39 @@ local systems = {
         draw = function()
             for id, e in pairs(entities) do
                 if e.ship then
+                    local t = e.transform
                     love.graphics.push()
-                    love.graphics.translate(e.transform.x, e.transform.y)
-                    local hw = e.transform.w / 2
-                    local hh = e.transform.h / 2
+                    love.graphics.translate(t.x, t.y)
+                    -- guides
+                    local xx = t.w / 12
+                    local yy = t.h / 12
+                    local xTop = 3 * xx
+                    local xBottom = 6 * xx
+                    local xLegStart = 4 * xx
+                    local xLegEnd = 5 * xx -- reused in shipPadCollider.update
+                    local yTop = 6 * yy
+                    local yAngle = yy
+                    local yBottom = -4 * yy -- reused in booster1.transform
+                    local yLeg = -6 * yy
+                    -- body
                     love.graphics.line(
-                        -hw, -hh,
-                        -hw, 0,
-                        -hw / 2, hh,
-                        hw / 2, hh,
-                        hw, 0,
-                        hw, -hh,
-                        -hw, -hh
+                        -xBottom, yBottom, -- bottom left
+                        -xBottom, yAngle, -- angle left
+                        -xTop, yTop, -- top left
+                        xTop, yTop, -- top right
+                        xBottom, yAngle, -- angle right
+                        xBottom, yBottom, -- bottom right
+                        -xBottom, yBottom -- back to bottom left
+                    )
+                    -- leg left
+                    love.graphics.line(
+                        -xLegStart, yBottom,
+                        -xLegEnd, yLeg
+                    )
+                    -- leg right
+                    love.graphics.line(
+                        xLegStart, yBottom,
+                        xLegEnd, yLeg
                     )
                     love.graphics.pop()
                 end
@@ -260,7 +281,7 @@ local systems = {
                 local dx = math.abs(s.x - p.x)
                 local dy = math.abs((s.y - s.h / 2) - p.y)
                 local v = math.sqrt(entities.ship.body.vx ^ 2 + entities.ship.body.vy ^ 2)
-                local offsetOkay = dx < s.w / 2
+                local offsetOkay = dx < (p.w - s.w * 10 / 12) / 2
                 local altitudeOkay = dy < 0.001
                 local speedOkay = v < 0.08
                 local isLanding = offsetOkay and altitudeOkay and speedOkay
@@ -325,7 +346,7 @@ local systems = {
                     transform = {
                         x = t.x,
                         y = t.y + 0.05,
-                        w = 0.05,
+                        w = 0.07,
                         h = 0.05
                     },
                     pad = {}
