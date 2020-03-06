@@ -74,6 +74,11 @@ local entities = {
         },
         fuelGauge = {}
     },
+    ground = {
+        ground = {
+            created = false
+        }
+    },
     wall = {
         id = "wall",
         transform = {
@@ -83,6 +88,12 @@ local entities = {
             h = 0.5
         },
         wall = {}
+    },
+    starField = {
+        stars = {
+            count = 100,
+            points = {}
+        }
     }
 }
 
@@ -355,6 +366,7 @@ local systems = {
                 end
             end
             if not entities.pad and padWalls then
+                entities.ground.ground.created = true
                 local t = padWalls[math.random(1, #padWalls)].transform
                 entities.pad = {
                     transform = {
@@ -412,6 +424,38 @@ local systems = {
                     local t = e.transform
                     love.graphics.line(t.x - t.w / 2, t.y, t.x + t.w / 2, t.y)
                     love.graphics.line(t.x, t.y, t.x, t.y - t.h)
+                end
+            end
+        end
+    },
+    stars = {
+        update = function(dt)
+            for id, e in pairs(entities) do
+                if e.stars and entities.ground.ground.created then
+                    while #e.stars.points < e.stars.count do
+                        local x = math.random()
+                        local y = math.random()
+                        local distanceMin = 1 / 0
+                        local heightMin = 0
+                        for id2, e2 in pairs(entities) do
+                            if e2.wall then
+                                local distance = math.abs(e2.transform.x - x)
+                                if distance < distanceMin then
+                                    distanceMin = distance
+                                    heightMin = e2.transform.y
+                                end
+                            end
+                        end
+                        y = y + heightMin
+                        e.stars.points[#e.stars.points + 1] = { x, y }
+                    end
+                end
+            end
+        end,
+        draw = function()
+            for id, e in pairs(entities) do
+                if e.stars then
+                    love.graphics.points(e.stars.points)
                 end
             end
         end
