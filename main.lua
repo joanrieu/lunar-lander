@@ -411,7 +411,10 @@ local systems = {
                     local lw = love.graphics.getLineWidth()
                     local t = e.transform
                     love.graphics.setLineWidth(0.5)
+                    local oldColorR, oldColorG, oldColorB, oldColorA = love.graphics.getColor()
+                    love.graphics.setColor(1, 2 * e.explosion.time, 0)
                     love.graphics.circle("line", t.x, t.y, 3 * e.explosion.time)
+                    love.graphics.setColor(oldColorR, oldColorG, oldColorB, oldColorA)
                     love.graphics.setLineWidth(lw)
                 end
             end
