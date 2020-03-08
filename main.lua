@@ -1,7 +1,15 @@
 function titleScreen()
     return {
         titleScreen = {
-            titleScreen = {}
+            titleScreen = {
+                time = 0
+            }
+        },
+        starField = {
+            stars = {
+                count = 100,
+                points = {}
+            }
         }
     }
 end
@@ -109,6 +117,90 @@ end
 
 local entities = titleScreen()
 
+local font = {
+    A = function()
+        love.graphics.line(0, 0, 0, 0.5, 0.2, 1, 0.8, 1, 1, 0.5, 1, 0)
+        love.graphics.line(0.3, 0.5, 0.7, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    B = function()
+        love.graphics.line(0.5, 0.5, 0.8, 1, 0, 1, 0, 0, 1, 0, 0.5, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    C = function()
+        love.graphics.line(1, 1, 0, 1, 0, 0, 1, 0)
+        love.graphics.translate(2, 0)
+    end,
+    D = function()
+        love.graphics.line(0, 1, 1, 1, 1, 0, 0, 0)
+        love.graphics.line(0.2, 0, 0.2, 1)
+        love.graphics.translate(2, 0)
+    end,
+    E = function()
+        love.graphics.line(1, 1, 0, 1, 0, 0, 1, 0)
+        love.graphics.line(0, 0.5, 0.4, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    H = function()
+        love.graphics.line(0, 0, 0, 1)
+        love.graphics.line(1, 1, 1, 0)
+        love.graphics.line(0, 0.5, 1, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    I = function()
+        love.graphics.line(0, 1, 1, 1)
+        love.graphics.line(0.5, 1, 0.5, 0)
+        love.graphics.line(0, 0, 1, 0)
+        love.graphics.translate(2, 0)
+    end,
+    L = function()
+        love.graphics.line(0, 1, 0, 0, 1, 0)
+        love.graphics.translate(2, 0)
+    end,
+    N = function()
+        love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0)
+        love.graphics.translate(2, 0)
+    end,
+    O = function()
+        love.graphics.line(0, 0, 1, 0, 1, 1, 0, 1, 0, 0)
+        love.graphics.translate(2, 0)
+    end,
+    P = function()
+        love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0.7, 0, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    R = function()
+        love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0.7, 0, 0.5)
+        love.graphics.line(0.5, 0.6, 1, 0)
+        love.graphics.translate(2, 0)
+    end,
+    S = function()
+        love.graphics.line(1, 1, 0, 1, 0, 0.5, 1, 0.5, 1, 0, 0, 0)
+        love.graphics.translate(2, 0)
+    end,
+    T = function()
+        love.graphics.line(0, 1, 1, 1)
+        love.graphics.line(0.5, 0, 0.5, 1)
+        love.graphics.translate(2, 0)
+    end,
+    U = function()
+        love.graphics.line(0, 1, 0, 0, 1, 0, 1, 1)
+        love.graphics.translate(2, 0)
+    end,
+    W = function()
+        love.graphics.line(0, 1, 0, 0, 0.5, 0.5, 1, 0, 1, 1)
+        love.graphics.translate(2, 0)
+    end,
+    Y = function()
+        love.graphics.line(0, 1, 0.5, 0.5, 1, 1)
+        love.graphics.line(0.5, 0, 0.5, 0.5)
+        love.graphics.translate(2, 0)
+    end,
+    space = function()
+        love.graphics.translate(2, 0)
+    end
+}
+
 local systems = {
     titleScreen = {
         updateAll = function(id, e, dt)
@@ -116,49 +208,96 @@ local systems = {
                 entities = newGame()
             end
         end,
+        update = function(id, e, dt)
+            if e.titleScreen then
+                e.titleScreen.time = e.titleScreen.time + dt
+            end
+        end,
         draw = function(id, e)
             if e.titleScreen then
                 love.graphics.push()
                 love.graphics.scale(1 / 16, 1 / 12)
-                love.graphics.translate(1.5, 8)
-                -- L
-                love.graphics.line(0, 1, 0, 0, 1, 0)
-                love.graphics.translate(2, 0)
-                -- U
-                love.graphics.line(0, 1, 0, 0, 1, 0, 1, 1)
-                love.graphics.translate(2, 0)
-                -- N
-                love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0)
-                love.graphics.translate(2, 0)
-                -- A
-                love.graphics.line(0, 0, 0, 0.5, 0.2, 1, 0.8, 1, 1, 0.5, 1, 0)
-                love.graphics.line(0.3, 0.5, 0.7, 0.5)
-                love.graphics.translate(2, 0)
-                -- R
-                love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0.7, 0, 0.5)
-                love.graphics.line(0.5, 0.6, 1, 0)
-                love.graphics.translate(-6, -2)
-                -- L
-                love.graphics.line(0, 1, 0, 0, 1, 0)
-                love.graphics.translate(2, 0)
-                -- A
-                love.graphics.line(0, 0, 0, 0.5, 0.2, 1, 0.8, 1, 1, 0.5, 1, 0)
-                love.graphics.line(0.3, 0.5, 0.7, 0.5)
-                love.graphics.translate(2, 0)
-                -- N
-                love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0)
-                love.graphics.translate(2, 0)
-                -- D
-                love.graphics.line(0, 1, 1, 1, 1, 0, 0, 0)
-                love.graphics.line(0.2, 0, 0.2, 1)
-                love.graphics.translate(2, 0)
-                -- E
-                love.graphics.line(1, 1, 0, 1, 0, 0, 1, 0)
-                love.graphics.line(0, 0.5, 0.4, 0.5)
-                love.graphics.translate(2, 0)
-                -- R
-                love.graphics.line(0, 0, 0, 1, 1, 1, 1, 0.7, 0, 0.5)
-                love.graphics.line(0.5, 0.6, 1, 0)
+                love.graphics.translate(1.5, 9)
+                font.L()
+                font.U()
+                font.N()
+                font.A()
+                font.R()
+                love.graphics.translate(-8, -2)
+                font.L()
+                font.A()
+                font.N()
+                font.D()
+                font.E()
+                font.R()
+                love.graphics.pop()
+
+                local oldColorR, oldColorG, oldColorB, oldColorA = love.graphics.getColor()
+                local alpha = 0.5 + 0.3 * math.sin(2 * e.titleScreen.time)
+                love.graphics.setColor(oldColorR, oldColorG, oldColorB, alpha)
+                love.graphics.push()
+                love.graphics.scale(1 / 64, 1 / 48)
+                love.graphics.translate(13, 17)
+                font.P()
+                font.R()
+                font.E()
+                font.S()
+                font.S()
+                font.space()
+                font.E()
+                font.N()
+                font.T()
+                font.E()
+                font.R()
+                font.space()
+                font.T()
+                font.O()
+                font.space()
+                font.P()
+                font.L()
+                font.A()
+                font.Y()
+                love.graphics.pop()
+                love.graphics.setColor(oldColorR, oldColorG, oldColorB, oldColorA)
+
+                love.graphics.push()
+                love.graphics.scale(1 / 64, 1 / 48)
+                love.graphics.translate(11, 8)
+                font.U()
+                font.S()
+                font.E()
+                font.space()
+                font.A()
+                font.R()
+                font.R()
+                font.O()
+                font.W()
+                font.S()
+                font.space()
+                font.T()
+                font.O()
+                font.space()
+                font.C()
+                font.O()
+                font.N()
+                font.T()
+                font.R()
+                font.O()
+                font.L()
+                love.graphics.translate(-35, -2)
+                font.S()
+                font.H()
+                font.I()
+                font.P()
+                font.space()
+                font.B()
+                font.O()
+                font.O()
+                font.S()
+                font.T()
+                font.E()
+                font.R()
+                font.S()
                 love.graphics.pop()
             end
         end
@@ -498,7 +637,7 @@ local systems = {
     },
     stars = {
         update = function(id, e, dt)
-            if e.stars and entities.ground.ground.created then
+            if e.stars and (not entities.ground or entities.ground.ground.created) then
                 while #e.stars.points < e.stars.count do
                     local x = math.random()
                     local y = math.random()
@@ -542,7 +681,8 @@ function love.update(dt)
     for k, v in pairs(systems) do
         if v.updateAll then
             v.updateAll(dt)
-        elseif v.update then
+        end
+        if v.update then
             for id, e in pairs(entities) do
                 v.update(id, e, dt)
             end
@@ -557,7 +697,8 @@ function love.draw()
     for k, v in pairs(systems) do
         if v.drawAll then
             v.drawAll()
-        elseif v.draw then
+        end
+        if v.draw then
             for id, e in pairs(entities) do
                 v.draw(id, e)
             end
