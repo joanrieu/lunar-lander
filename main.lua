@@ -135,6 +135,7 @@ local systems = {
                     local t = e.transform
                     love.graphics.push()
                     love.graphics.translate(t.x, t.y)
+                    local oldColorR, oldColorG, oldColorB, oldColorA = love.graphics.getColor()
                     -- guides
                     local xx = t.w / 12
                     local yy = t.h / 12
@@ -147,15 +148,18 @@ local systems = {
                     local yBottom = -4 * yy -- reused in booster1.transform
                     local yLeg = -6 * yy
                     -- body
-                    love.graphics.line(
+                    local body = {
                         -xBottom, yBottom, -- bottom left
                         -xBottom, yAngle, -- angle left
                         -xTop, yTop, -- top left
                         xTop, yTop, -- top right
                         xBottom, yAngle, -- angle right
                         xBottom, yBottom, -- bottom right
-                        -xBottom, yBottom -- back to bottom left
-                    )
+                    }
+                    love.graphics.setColor(0, 0, 0)
+                    love.graphics.polygon("fill", body)
+                    love.graphics.setColor(1, 1, 1)
+                    love.graphics.polygon("line", body)
                     -- leg left
                     love.graphics.line(
                         -xLegStart, yBottom,
@@ -166,6 +170,7 @@ local systems = {
                         xLegStart, yBottom,
                         xLegEnd, yLeg
                     )
+                    love.graphics.setColor(oldColorR, oldColorG, oldColorB, oldColorA)
                     love.graphics.pop()
                 end
             end
@@ -401,14 +406,14 @@ local systems = {
         draw = function()
             for id, e in pairs(entities) do
                 if e.explosion then
-                    local lw = love.graphics.getLineWidth()
+                    local oldLineWidth = love.graphics.getLineWidth()
                     local t = e.transform
                     love.graphics.setLineWidth(0.5)
                     local oldColorR, oldColorG, oldColorB, oldColorA = love.graphics.getColor()
                     love.graphics.setColor(1, 2 * e.explosion.time, 0)
                     love.graphics.circle("line", t.x, t.y, 3 * e.explosion.time)
                     love.graphics.setColor(oldColorR, oldColorG, oldColorB, oldColorA)
-                    love.graphics.setLineWidth(lw)
+                    love.graphics.setLineWidth(oldLineWidth)
                 end
             end
         end
@@ -439,8 +444,11 @@ local systems = {
             for id, e in pairs(entities) do
                 if e.pad then
                     local t = e.transform
+                    local oldLineWidth = love.graphics.getLineWidth()
+                    love.graphics.setLineWidth(2 * oldLineWidth)
                     love.graphics.line(t.x - t.w / 2, t.y, t.x + t.w / 2, t.y)
                     love.graphics.line(t.x, t.y, t.x, t.y - t.h)
+                    love.graphics.setLineWidth(oldLineWidth)
                 end
             end
         end
