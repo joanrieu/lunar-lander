@@ -329,11 +329,12 @@ local systems = {
     },
     wall = {
         update = function(dt)
-            local padWalls = {}
-            for id, e in pairs(entities) do
-                if e.wall then
+            if not entities.ground.ground.created then
+                entities.ground.ground.created = true
+                for id, e in pairs(entities) do
                     local t = e.transform
-                    if t.w > 1 / size then
+                    if e.wall and t.w > 1 / size then
+                        entities.ground.ground.created = false
                         entities[e.id] = nil
                         local hw = t.w / 2
                         local hh = t.h / 2 * (1 + (math.random() - 0.5))
@@ -359,24 +360,8 @@ local systems = {
                             wall = {}
                         }
                         entities[right.id] = right
-                        padWalls = nil
-                    elseif padWalls and t.x > 0.2 and t.x < 0.8 then
-                        padWalls[#padWalls + 1] = e
                     end
                 end
-            end
-            if not entities.pad and padWalls then
-                entities.ground.ground.created = true
-                local t = padWalls[math.random(1, #padWalls)].transform
-                entities.pad = {
-                    transform = {
-                        x = t.x,
-                        y = t.y + 0.05,
-                        w = 0.07,
-                        h = 0.05
-                    },
-                    pad = {}
-                }
             end
         end,
         draw = function()
@@ -421,6 +406,27 @@ local systems = {
         end
     },
     pad = {
+        update = function()
+            if not entities.pad and entities.ground.ground.created then
+                local ground = {}
+                for id, e in pairs(entities) do
+                    local t = e.transform
+                    if e.wall and t.x > 0.2 and t.x < 0.8 then
+                        ground[#ground + 1] = e
+                    end
+                end
+                local t = ground[math.random(1, #ground)].transform
+                entities.pad = {
+                    transform = {
+                        x = t.x,
+                        y = t.y + 0.05,
+                        w = 0.07,
+                        h = 0.05
+                    },
+                    pad = {}
+                }
+            end
+        end,
         draw = function()
             for id, e in pairs(entities) do
                 if e.pad then
