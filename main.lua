@@ -102,9 +102,8 @@ local systems = {
         update = function(dt)
             for id, e in pairs(entities) do
                 if e.ship then
-                    local gravity = -0.2
                     e.body.ax = 0
-                    e.body.ay = gravity
+                    e.body.ay = 0
                     for i = 1, 3 do
                         local booster = entities["booster" .. i].booster
                         e.body.ax = e.body.ax + booster.throttle * booster.ax
@@ -261,9 +260,18 @@ local systems = {
     body = {
         update = function(dt)
             for id, e in pairs(entities) do
-                if e.body and not e.body.grounded then
+                if e.body then
+                    local gravity = e.body.grounded and 0 or -0.2
                     e.body.vx = e.body.vx + e.body.ax * dt
-                    e.body.vy = e.body.vy + e.body.ay * dt
+                    e.body.vy = e.body.vy + (e.body.ay + gravity) * dt
+                    if e.body.grounded then
+                        if e.body.vy <= 0 then
+                            e.body.vx = 0
+                            e.body.vy = 0
+                        else
+                            e.body.grounded = false
+                        end
+                    end
                     e.transform.x = e.transform.x + e.body.vx * dt
                     e.transform.y = e.transform.y + e.body.vy * dt
                 end
@@ -308,7 +316,7 @@ local systems = {
                 local v = math.sqrt(entities.ship.body.vx ^ 2 + entities.ship.body.vy ^ 2)
                 local offsetOkay = dx < (p.w - s.w * 10 / 12) / 2
                 local altitudeOkay = dy < 0.001
-                local speedOkay = v < 0.08
+                local speedOkay = v < 0.08 and entities.ship.body.vy <= 0
                 local isLanding = offsetOkay and altitudeOkay and speedOkay
 
                 -- rectangle collision check
