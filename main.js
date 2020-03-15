@@ -1,4 +1,4 @@
-const love = require("love");
+const love = new Love();
 
 const size = 600;
 
