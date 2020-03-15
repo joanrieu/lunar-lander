@@ -50,7 +50,7 @@ function newGame() {
         throttle: 0,
         ax: 0,
         ay: 0.4,
-        key: "up",
+        key: "ArrowUp",
         main: true
       }
     },
@@ -66,7 +66,7 @@ function newGame() {
         throttle: 0,
         ax: 0.1,
         ay: 0,
-        key: "right",
+        key: "ArrowRight",
         main: false
       }
     },
@@ -82,7 +82,7 @@ function newGame() {
         throttle: 0,
         ax: -0.1,
         ay: 0,
-        key: "left",
+        key: "ArrowLeft",
         main: false
       }
     },
@@ -208,7 +208,7 @@ const font = {
 const systems = {
   titleScreen: {
     updateAll(id, e, dt) {
-      if (love.keyboard.isDown("return")) {
+      if (love.keyboard.isDown("Enter")) {
         entities = newGame();
       }
     },
@@ -515,7 +515,7 @@ const systems = {
         const t = e.transform;
         const distanceMax = 1 / 0;
         const targetMax = nil;
-        for ([id2, e2] of pairs(entities)) {
+        for ([id2, e2] of Object.entries(entities)) {
           if (e2.wall) {
             const t2 = e2.transform;
             const distance = Math.sqrt((t.x - t2.x) ^ (2 + (t.y - t2.y)) ^ 2);
@@ -564,9 +564,7 @@ const systems = {
         if (isLanding) {
           entities.ship.body.grounded = true;
           entities.ship.transform.y = s.h / 2 + entities.pad.transform.y;
-        }
-      } else {
-        if (isColliding) {
+        } else if (isColliding) {
           entities.ship.collision = {
             target: entities.pad
           };
@@ -578,7 +576,7 @@ const systems = {
     updateAll(dt) {
       if (entities.ground && !entities.ground.ground.created) {
         entities.ground.ground.created = true;
-        for ([id, e] of pairs(entities)) {
+        for ([id, e] of Object.entries(entities)) {
           const t = e.transform;
           if (e.wall && t.w > 1 / size) {
             entities.ground.ground.created = false;
@@ -655,7 +653,7 @@ const systems = {
     updateAll() {
       if (!entities.pad && entities.ground && entities.ground.ground.created) {
         const ground = {};
-        for ([id, e] of pairs(entities)) {
+        for ([id, e] of Object.entries(entities)) {
           const t = e.transform;
           if (e.wall && t.x > 0.2 && t.x < 0.8) {
             ground.push(e);
@@ -689,10 +687,10 @@ const systems = {
       if (e.stars && (!entities.ground || entities.ground.ground.created)) {
         while (e.stars.points.length < e.stars.count) {
           const x = Math.random();
-          const y = Math.random();
+          let y = Math.random();
           const distanceMin = 1 / 0;
           const heightMin = 0;
-          for ([id2, e2] of pairs(entities)) {
+          for ([id2, e2] of Object.entries(entities)) {
             if (e2.wall) {
               const distance = Math.abs(e2.transform.x - x);
               if (distance < distanceMin) {
@@ -711,29 +709,21 @@ const systems = {
         love.graphics.points(e.stars.points);
       }
     }
-  },
-  quit: {
-    updateAll() {
-      if (love.keyboard.isDown("escape")) {
-        love.event.quit();
-      }
-    }
   }
 };
 
 love.conf = function(t) {
-  t.window.title = "Lunar Lander";
   t.window.width = size;
   t.window.height = size;
 };
 
 love.update = function(dt) {
-  for ([k, v] of pairs(systems)) {
+  for ([k, v] of Object.entries(systems)) {
     if (v.updateAll) {
       v.updateAll(dt);
     }
     if (v.update) {
-      for ([id, e] of pairs(entities)) {
+      for ([id, e] of Object.entries(entities)) {
         v.update(id, e, dt);
       }
     }
@@ -744,12 +734,12 @@ love.draw = function() {
   love.graphics.scale(size, -size);
   love.graphics.translate(0, -1);
   love.graphics.setLineWidth(1 / size);
-  for ([k, v] of pairs(systems)) {
+  for ([k, v] of Object.entries(systems)) {
     if (v.drawAll) {
       v.drawAll();
     }
     if (v.draw) {
-      for ([id, e] of pairs(entities)) {
+      for ([id, e] of Object.entries(entities)) {
         v.draw(id, e);
       }
     }

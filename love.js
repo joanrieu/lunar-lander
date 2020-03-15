@@ -1,4 +1,28 @@
 class Love {
+  constructor() {
+    setTimeout(() => {
+      const t = { window: {} };
+      this.conf(t);
+      this.conf = t;
+
+      let lastTime = Date.now();
+      const draw = () => {
+        const time = Date.now();
+        const dt = time - lastTime;
+        lastTime = time;
+        love.update(dt / 1000);
+        love.draw();
+        requestAnimationFrame(draw);
+      };
+      requestAnimationFrame(draw);
+
+      const keys = {};
+      window.addEventListener("keydown", e => (keys[e.key] = true));
+      window.addEventListener("keyup", e => (keys[e.key] = false));
+      this.keyboard.isDown.keys = keys;
+    });
+  }
+
   graphics = {
     push() {},
     pop() {},
@@ -26,9 +50,5 @@ class Love {
     isDown(key) {
       return false;
     }
-  };
-
-  event = {
-    quit() {}
   };
 }
