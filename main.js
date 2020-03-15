@@ -311,6 +311,34 @@ const systems = {
       }
     }
   },
+  stars: {
+    update(id, e, dt) {
+      if (e.stars && (!entities.ground || entities.ground.ground.created)) {
+        while (e.stars.points.length < e.stars.count) {
+          const x = Math.random();
+          let y = Math.random();
+          let distanceMin = 1 / 0;
+          let heightMin = 0;
+          for ([id2, e2] of Object.entries(entities)) {
+            if (e2.wall) {
+              const distance = Math.abs(e2.transform.x - x);
+              if (distance < distanceMin) {
+                distanceMin = distance;
+                heightMin = e2.transform.y;
+              }
+            }
+          }
+          y = y + heightMin;
+          e.stars.points.push([x, y]);
+        }
+      }
+    },
+    draw(id, e) {
+      if (e.stars) {
+        love.graphics.points(e.stars.points);
+      }
+    }
+  },
   ship: {
     update(id, e, dt) {
       if (e.ship) {
@@ -680,34 +708,6 @@ const systems = {
         love.graphics.line(t.x - t.w / 2, t.y, t.x + t.w / 2, t.y);
         love.graphics.line(t.x, t.y, t.x, t.y - t.h);
         love.graphics.setLineWidth(oldLineWidth);
-      }
-    }
-  },
-  stars: {
-    update(id, e, dt) {
-      if (e.stars && (!entities.ground || entities.ground.ground.created)) {
-        while (e.stars.points.length < e.stars.count) {
-          const x = Math.random();
-          let y = Math.random();
-          let distanceMin = 1 / 0;
-          let heightMin = 0;
-          for ([id2, e2] of Object.entries(entities)) {
-            if (e2.wall) {
-              const distance = Math.abs(e2.transform.x - x);
-              if (distance < distanceMin) {
-                distanceMin = distance;
-                heightMin = e2.transform.y;
-              }
-            }
-          }
-          y = y + heightMin;
-          e.stars.points.push([x, y]);
-        }
-      }
-    },
-    draw(id, e) {
-      if (e.stars) {
-        love.graphics.points(e.stars.points);
       }
     }
   }
