@@ -518,14 +518,14 @@ const systems = {
         for ([id2, e2] of Object.entries(entities)) {
           if (e2.wall) {
             const t2 = e2.transform;
-            const distance = Math.sqrt((t.x - t2.x) ^ (2 + (t.y - t2.y)) ^ 2);
+            const distance = Math.sqrt((t.x - t2.x) ** 2 + (t.y - t2.y) ** 2);
             if (distance < distanceMax) {
               distanceMax = distance;
               targetMax = e2;
             }
           }
         }
-        if (distanceMax < Math.sqrt(t.w ^ (2 + t.h) ^ 2) / 2) {
+        if (distanceMax < Math.sqrt((t.w ** 2 + t.h ** 2) / 2)) {
           e.collision = {
             target: targetMax
           };
@@ -545,7 +545,7 @@ const systems = {
           const dx = Math.abs(s.x - p.x);
           const dy = Math.abs(s.y - s.h / 2 - p.y);
           const v = Math.sqrt(
-            entities.ship.body.vx ^ (2 + entities.ship.body.vy) ^ 2
+            entities.ship.body.vx ** 2 + entities.ship.body.vy ** 2
           );
           const offsetOkay = dx < (p.w - (s.w * 10) / 12) / 2;
           const altitudeOkay = dy < 0.001;

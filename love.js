@@ -5,11 +5,11 @@ class Love {
       this.conf(t);
       this.conf = t;
 
-      this.canvas = document.createElement("canvas");
-      this.ctx = this.canvas.getContext("2d");
-      this.canvas.width = this.conf.window.width;
-      this.canvas.height = this.conf.window.height;
-      document.body.appendChild(this.canvas);
+      this.graphics.canvas = document.createElement("canvas");
+      this.graphics.ctx = this.graphics.canvas.getContext("2d");
+      this.graphics.canvas.width = this.conf.window.width;
+      this.graphics.canvas.height = this.conf.window.height;
+      document.body.appendChild(this.graphics.canvas);
 
       let lastTime = Date.now();
       const draw = () => {
@@ -26,15 +26,16 @@ class Love {
       const keys = {};
       window.addEventListener("keydown", e => (keys[e.key] = true));
       window.addEventListener("keyup", e => (keys[e.key] = false));
-      this.keyboard.isDown.keys = keys;
+      this.keyboard._keys = keys;
     });
   }
 
   graphics = {
     _reset() {
       this.transforms = [[1, 0, 0, 0, 1, 0, 0, 0, 1]];
-      this._color = [1, 1, 1, 1];
-      this._lineWidth = 1;
+      this.setColor(1, 1, 1, 1);
+      this.setLineWidth(1);
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
     _transform(matrix) {
       const [a1, a2, a3, a4, a5, a6, a7, a8, a9] = this.transforms.pop();
@@ -52,7 +53,9 @@ class Love {
       ]);
     },
     _apply(point) {
-      const [a1, a2, a3, a4, a5, a6, a7, a8, a9] = this.transforms.pop();
+      const [a1, a2, a3, a4, a5, a6, a7, a8, a9] = this.transforms[
+        this.transforms.length - 1
+      ];
       const [b1, b2] = point;
       const b3 = 1;
       const [x, y, s] = [
@@ -84,16 +87,53 @@ class Love {
     },
     setColor(r, g, b, a) {
       this._color = [r, g, b, a];
+      this._colorHex =
+        "#" +
+        ((r * 255) | 0).toString(16) +
+        ((g * 255) | 0).toString(16) +
+        ((b * 255) | 0).toString(16) +
+        ((a * 255) | 0).toString(16);
     },
     getLineWidth() {
       return this._lineWidth;
     },
     setLineWidth(lineWidth) {
       this._lineWidth = lineWidth;
+      const point = this._apply([1, 0]);
+      this.ctx.lineWidth = lineWidth * Math.sqrt(point[0] ** 2 + point[1] ** 2);
     },
     circle(mode, x, y, radius) {},
-    line(...coords) {},
-    points(points) {},
+    line(...coords) {
+      let created = false;
+      let x;
+      for (let y of coords) {
+        if (x == undefined) {
+          x = y;
+        } else {
+          const point = this._apply([x, y]);
+          x = point[0];
+          y = point[1];
+          if (!created) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+            created = true;
+          } else {
+            this.ctx.lineTo(x, y);
+          }
+          x = undefined;
+        }
+      }
+      this.ctx.strokeStyle = this._colorHex;
+      this.ctx.stroke();
+      this.ctx.closePath();
+    },
+    points(points) {
+      this.ctx.fillStyle = this._colorHex;
+      for (const point of points) {
+        const [x, y] = this._apply(point);
+        this.ctx.fillRect(x | 0, y | 0, 1, 1);
+      }
+    },
     polygon(mode, ...coords) {
       if (coords.length === 1) coords = coords[0];
     },
@@ -102,7 +142,7 @@ class Love {
 
   keyboard = {
     isDown(key) {
-      return false;
+      return this._keys[key];
     }
   };
 }
