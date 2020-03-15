@@ -119,7 +119,7 @@ function newGame() {
   };
 }
 
-const entities = titleScreen();
+let entities = titleScreen();
 
 const font = {
   A() {
@@ -322,11 +322,11 @@ const systems = {
           e.body.ay = e.body.ay + booster.throttle * booster.ay;
         }
         if (e.collision) {
-          entities.ship = nil;
-          entities.booster1 = nil;
-          entities.booster2 = nil;
-          entities.booster3 = nil;
-          entities.fuelGauge = nil;
+          delete entities.ship;
+          delete entities.booster1;
+          delete entities.booster2;
+          delete entities.booster3;
+          delete entities.fuelGauge;
           const t = e.collision.target.transform;
           entities.explosion = {
             transform: {
@@ -513,8 +513,8 @@ const systems = {
     update(id, e, dt) {
       if (e.ship) {
         const t = e.transform;
-        const distanceMax = 1 / 0;
-        const targetMax = nil;
+        let distanceMax = 1 / 0;
+        let targetMax;
         for ([id2, e2] of Object.entries(entities)) {
           if (e2.wall) {
             const t2 = e2.transform;
@@ -525,7 +525,7 @@ const systems = {
             }
           }
         }
-        if (distanceMax < Math.sqrt((t.w ** 2 + t.h ** 2) / 2)) {
+        if (distanceMax < Math.sqrt(t.w ** 2 + t.h ** 2) / 2) {
           e.collision = {
             target: targetMax
           };
@@ -580,7 +580,7 @@ const systems = {
           const t = e.transform;
           if (e.wall && t.w > 1 / size) {
             entities.ground.ground.created = false;
-            entities[e.id] = nil;
+            delete entities[e.id];
             const hw = t.w / 2;
             const hh = (t.h / 2) * (1 + (Math.random() - 0.5));
             const left = {
@@ -652,14 +652,15 @@ const systems = {
   pad: {
     updateAll() {
       if (!entities.pad && entities.ground && entities.ground.ground.created) {
-        const ground = {};
+        const ground = [];
         for ([id, e] of Object.entries(entities)) {
           const t = e.transform;
           if (e.wall && t.x > 0.2 && t.x < 0.8) {
             ground.push(e);
           }
         }
-        const t = ground[(math.random() * (ground.length - 1)) | 0].transform;
+        const t =
+          ground[Math.round(Math.random() * (ground.length - 1))].transform;
         entities.pad = {
           transform: {
             x: t.x,
@@ -688,8 +689,8 @@ const systems = {
         while (e.stars.points.length < e.stars.count) {
           const x = Math.random();
           let y = Math.random();
-          const distanceMin = 1 / 0;
-          const heightMin = 0;
+          let distanceMin = 1 / 0;
+          let heightMin = 0;
           for ([id2, e2] of Object.entries(entities)) {
             if (e2.wall) {
               const distance = Math.abs(e2.transform.x - x);
