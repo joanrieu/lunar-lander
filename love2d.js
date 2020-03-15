@@ -136,8 +136,37 @@ class Love {
     },
     polygon(mode, ...coords) {
       if (coords.length === 1) coords = coords[0];
+      let created = false;
+      let x;
+      for (let y of coords) {
+        if (x == undefined) {
+          x = y;
+        } else {
+          const point = this._apply([x, y]);
+          x = point[0];
+          y = point[1];
+          if (!created) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+            created = true;
+          } else {
+            this.ctx.lineTo(x, y);
+          }
+          x = undefined;
+        }
+      }
+      this.ctx.closePath();
+      if (mode === "fill") {
+        this.fillStyle = this._colorHex;
+        this.ctx.fill();
+      } else if (mode === "line") {
+        this.ctx.strokeStyle = this._colorHex;
+        this.ctx.stroke();
+      }
     },
-    rectangle(mode, x, y, w, h) {}
+    rectangle(mode, x, y, w, h) {
+      this.polygon(mode, x, y, x + w, y, x + w, y + h, x, y + h);
+    }
   };
 
   keyboard = {
