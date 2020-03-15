@@ -521,7 +521,7 @@ const systems = {
   body: {
     update(id, e, dt) {
       if (e.body) {
-        const gravity = (e.body.grounded && 0) || -0.2;
+        const gravity = -0.2;
         e.body.vx = e.body.vx + e.body.ax * dt;
         e.body.vy = e.body.vy + (e.body.ay + gravity) * dt;
         if (e.body.grounded) {
