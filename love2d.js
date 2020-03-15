@@ -65,6 +65,10 @@ class Love {
       ];
       return [x / s, y / s];
     },
+    _getScale() {
+      const point = this._apply([1, 0]);
+      return Math.sqrt(point[0] ** 2 + point[1] ** 2);
+    },
     push() {
       this.transforms.push(this.transforms[this.transforms.length - 1]);
     },
@@ -85,24 +89,37 @@ class Love {
     getColor() {
       return this._color;
     },
-    setColor(r, g, b, a) {
+    setColor(r, g, b, a = 1) {
       this._color = [r, g, b, a];
       this._colorHex =
         "#" +
-        ((r * 255) | 0).toString(16) +
-        ((g * 255) | 0).toString(16) +
-        ((b * 255) | 0).toString(16) +
-        ((a * 255) | 0).toString(16);
+        ((r * 255) | 0).toString(16).padStart(2, "0") +
+        ((g * 255) | 0).toString(16).padStart(2, "0") +
+        ((b * 255) | 0).toString(16).padStart(2, "0") +
+        ((a * 255) | 0).toString(16).padStart(2, "0");
     },
     getLineWidth() {
       return this._lineWidth;
     },
     setLineWidth(lineWidth) {
       this._lineWidth = lineWidth;
-      const point = this._apply([1, 0]);
-      this.ctx.lineWidth = lineWidth * Math.sqrt(point[0] ** 2 + point[1] ** 2);
+      this.ctx.lineWidth = lineWidth * this._getScale();
     },
-    circle(mode, x, y, radius) {},
+    circle(mode, x, y, radius) {
+      const point = this._apply([x, y]);
+      x = point[0];
+      y = point[1];
+      radius *= this._getScale();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, -Math.PI, Math.PI);
+      if (mode === "fill") {
+        this.ctx.fillStyle = this._colorHex;
+        this.ctx.fill();
+      } else if (mode === "line") {
+        this.ctx.strokeStyle = this._colorHex;
+        this.ctx.stroke();
+      }
+    },
     line(...coords) {
       let created = false;
       let x;
@@ -125,7 +142,6 @@ class Love {
       }
       this.ctx.strokeStyle = this._colorHex;
       this.ctx.stroke();
-      this.ctx.closePath();
     },
     points(points) {
       this.ctx.fillStyle = this._colorHex;
@@ -157,7 +173,7 @@ class Love {
       }
       this.ctx.closePath();
       if (mode === "fill") {
-        this.fillStyle = this._colorHex;
+        this.ctx.fillStyle = this._colorHex;
         this.ctx.fill();
       } else if (mode === "line") {
         this.ctx.strokeStyle = this._colorHex;
